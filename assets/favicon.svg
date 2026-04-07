@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="虫眼鏡の favicon">
-  <circle cx="26" cy="26" r="16" fill="none" stroke="#111111" stroke-linecap="round" stroke-width="7"/>
-  <path d="M39 39 53 53" fill="none" stroke="#111111" stroke-linecap="round" stroke-width="7"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="白い虫眼鏡の favicon">
+  <rect width="64" height="64" rx="14" fill="#111111"/>
+  <circle cx="26" cy="26" r="16" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-width="7"/>
+  <path d="M39 39 53 53" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-width="7"/>
 </svg>
