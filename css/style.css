@@ -137,6 +137,7 @@ a {
   display: flex;
   align-items: center;
   padding: 0 20px;
+  min-height: 48px;
   box-shadow: var(--soft-shadow);
   transition: box-shadow 0.2s;
 }
@@ -147,17 +148,27 @@ a {
 
 .search-input {
   flex: 1;
+  min-width: 0;
   font-size: 17px;
-  line-height: 1.2;
+  line-height: normal;
   background: transparent;
   width: 100%;
-  padding: 13px 0;
+  padding: 0;
   margin: 0;
+  border: 0;
+  outline: 0;
   color: #1d1d1f;
   letter-spacing: -0.022em;
-  vertical-align: middle;
   -webkit-appearance: none;
   appearance: none;
+  font-family: inherit;
+}
+
+/* iOS Safari の input カーソル中央寄せ補正
+   - height は使わず親の min-height + flex align-items:center に任せる
+   - input 自身は line-height:normal で自然な高さに */
+input.search-input {
+  height: auto;
 }
 
 .search-input::placeholder {
