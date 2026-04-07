@@ -39,7 +39,77 @@
     includeScore: true,
     shouldSort: true,
   };
-  const fuse = new Fuse(window.GOMI_DATA, fuseOptions);
+  const fuse = typeof window.Fuse === 'function'
+    ? new window.Fuse(window.GOMI_DATA, fuseOptions)
+    : null;
+
+  function scoreTokenMatch(token, query, options = {}) {
+    if (!token || !query) return null;
+
+    const minReverseLength = options.minReverseLength || 2;
+
+    if (token === query) {
+      return 0;
+    }
+    if (token.startsWith(query)) {
+      return 10 + (token.length - query.length) / 1000;
+    }
+    if (token.endsWith(query)) {
+      return 20 + (token.length - query.length) / 1000;
+    }
+
+    const index = token.indexOf(query);
+    if (index !== -1) {
+      return 30 + index / 100 + (token.length - query.length) / 1000;
+    }
+
+    if (token.length >= minReverseLength && query.includes(token)) {
+      return 60 + (query.length - token.length) / 1000;
+    }
+
+    return null;
+  }
+
+  function getItemMatchScore(item, query, hira, kata) {
+    const scores = [];
+
+    scores.push(scoreTokenMatch(item.n, query));
+    scores.push(scoreTokenMatch(item.k, hira));
+
+    if (item.a) {
+      item.a.forEach((alias) => {
+        scores.push(scoreTokenMatch(alias, query));
+        scores.push(scoreTokenMatch(alias, kata));
+      });
+    }
+
+    const matchedScores = scores.filter((score) => score != null);
+    if (matchedScores.length === 0) return null;
+
+    return Math.min(...matchedScores);
+  }
+
+  function compareRankedResults(a, b) {
+    const aHasLexical = Number.isFinite(a.lexicalScore);
+    const bHasLexical = Number.isFinite(b.lexicalScore);
+    if (aHasLexical !== bHasLexical) {
+      return aHasLexical ? -1 : 1;
+    }
+    if (aHasLexical && a.lexicalScore !== b.lexicalScore) {
+      return a.lexicalScore - b.lexicalScore;
+    }
+
+    const aHasFuse = Number.isFinite(a.fuseScore);
+    const bHasFuse = Number.isFinite(b.fuseScore);
+    if (aHasFuse !== bHasFuse) {
+      return aHasFuse ? -1 : 1;
+    }
+    if (aHasFuse && a.fuseScore !== b.fuseScore) {
+      return a.fuseScore - b.fuseScore;
+    }
+
+    return a.item.k.localeCompare(b.item.k, 'ja');
+  }
 
   // ===== 検索関数（ハイブリッド型） =====
   function search(query) {
@@ -48,49 +118,41 @@
 
     const hira = toHiragana(trimmed);
     const kata = toKatakana(trimmed);
-    const seen = new Set();
-    const results = [];
+    const ranked = new Map();
 
-    const add = (item) => {
-      if (!seen.has(item.n)) {
-        seen.add(item.n);
-        results.push(item);
-      }
-    };
-
-    // 1) 完全一致（最優先）
     window.GOMI_DATA.forEach((item) => {
-      if (
-        item.n === trimmed ||
-        item.k === hira ||
-        (item.a && (item.a.includes(trimmed) || item.a.includes(kata)))
-      ) {
-        add(item);
-      }
+      const lexicalScore = getItemMatchScore(item, trimmed, hira, kata);
+      if (lexicalScore == null) return;
+
+      ranked.set(item.n, {
+        item,
+        lexicalScore,
+        fuseScore: Infinity,
+      });
     });
 
-    // 2) 双方向部分一致
-    window.GOMI_DATA.forEach((item) => {
-      if (seen.has(item.n)) return;
-      const hits =
-        item.n.includes(trimmed) ||
-        trimmed.includes(item.n) ||
-        item.k.includes(hira) ||
-        hira.includes(item.k) ||
-        (item.a &&
-          item.a.some(
-            (a) => a.includes(trimmed) || trimmed.includes(a) || a.includes(kata)
-          ));
-      if (hits) add(item);
-    });
+    if (fuse) {
+      const queries = trimmed === hira ? [trimmed] : [trimmed, hira];
+      queries.forEach((value) => {
+        fuse.search(value).forEach(({ item, score }) => {
+          const existing = ranked.get(item.n);
+          if (existing) {
+            existing.fuseScore = Math.min(existing.fuseScore, score ?? Infinity);
+            return;
+          }
 
-    // 3) Fuse.js のあいまい検索
-    fuse.search(trimmed).forEach(({ item }) => add(item));
-    if (trimmed !== hira) {
-      fuse.search(hira).forEach(({ item }) => add(item));
+          ranked.set(item.n, {
+            item,
+            lexicalScore: Infinity,
+            fuseScore: score ?? Infinity,
+          });
+        });
+      });
     }
 
-    return results;
+    return Array.from(ranked.values())
+      .sort(compareRankedResults)
+      .map(({ item }) => item);
   }
 
   // ===== サジェスト描画 =====
@@ -571,5 +633,8 @@
   renderLegend();
   handleRoute();
 
+  if (!fuse) {
+    console.warn('[ゴミ分別けんさく] Fuse.js を読み込めなかったため、部分一致検索のみで動作しています');
+  }
   console.log(`[ゴミ分別けんさく] ${window.GOMI_DATA.length} 品目を読み込みました`);
 })();

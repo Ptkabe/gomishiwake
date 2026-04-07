@@ -1,11 +1,14 @@
 /* ============================================
    ゴミ分別けんさく スタイル
-   - フラットデザイン
-   - 枠線なし・グラデーションなし
-   - スマホビューに最適化
+   Apple Japan Design 準拠
+   - SF Pro JP フォントスタック
+   - 背景: #f5f5f7 (Light Gray)
+   - テキスト: #1d1d1f (Near Black)
+   - Apple Blue: #0071e3 / Link: #0066cc
+   - ピル型ボタン (980px radius)
+   - 負の letter-spacing (-0.022em ≒ -0.357px @17px)
    ============================================ */
 
-/* ----- リセット ----- */
 *,
 *::before,
 *::after {
@@ -15,18 +18,23 @@
 }
 
 html {
-  font-size: 16px;
+  font-size: 17px;
   -webkit-text-size-adjust: 100%;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
-    "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif;
-  background-color: #f5f5f5;
-  color: #1a1a1a;
-  line-height: 1.6;
+  font-family: "SF Pro JP", "SF Pro Text", "SF Pro Icons",
+    "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", メイリオ, Meiryo,
+    "ＭＳ Ｐゴシック", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.47;
+  letter-spacing: -0.022em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: normal;
 }
 
 button,
@@ -47,33 +55,46 @@ ul {
   list-style: none;
 }
 
-/* ----- アプリ全体（スマホビュー最大幅） ----- */
+a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ----- アプリ全体 ----- */
 .app {
   max-width: 480px;
   margin: 0 auto;
   min-height: 100vh;
-  background-color: #ffffff;
   padding-bottom: 32px;
 }
 
 /* ----- ヘッダー ----- */
 .header {
-  padding: 24px 20px 16px;
+  padding: 32px 20px 16px;
   text-align: center;
-  background-color: #ffffff;
 }
 
 .title {
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: #1a1a1a;
+  font-family: "SF Pro JP", "SF Pro Display", "SF Pro Icons",
+    "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", メイリオ, Meiryo,
+    "ＭＳ Ｐゴシック", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.14;
+  letter-spacing: 0.007em;
+  color: #1d1d1f;
 }
 
 .subtitle {
-  font-size: 12px;
-  color: #757575;
-  margin-top: 6px;
+  font-size: 14px;
+  color: #6e6e73;
+  margin-top: 8px;
+  line-height: 1.42;
+  letter-spacing: 0;
 }
 
 /* ----- 検索セクション ----- */
@@ -81,31 +102,43 @@ ul {
   position: sticky;
   top: 0;
   z-index: 10;
-  background-color: #ffffff;
-  padding: 12px 16px 16px;
+  background-color: rgba(245, 245, 247, 0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  padding: 12px 20px 16px;
 }
 
 .search-box {
   position: relative;
-  background-color: #f0f0f0;
-  border-radius: 12px;
+  background-color: #ffffff;
+  border-radius: 980px;
   display: flex;
   align-items: center;
-  padding: 0 14px;
+  padding: 0 20px;
+  transition: box-shadow 0.2s;
+}
+
+.search-box:focus-within {
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
 }
 
 .search-input {
   flex: 1;
-  height: 48px;
-  font-size: 16px;
+  height: 44px;
+  font-size: 17px;
   background: transparent;
   width: 100%;
   padding: 0;
+  color: #1d1d1f;
+  letter-spacing: -0.022em;
   -webkit-appearance: none;
   appearance: none;
 }
 
-/* type="search" のブラウザ標準クリアボタンを消す（保険） */
+.search-input::placeholder {
+  color: #6e6e73;
+}
+
 .search-input::-webkit-search-cancel-button,
 .search-input::-webkit-search-decoration,
 .search-input::-webkit-search-results-button,
@@ -114,64 +147,66 @@ ul {
   display: none;
 }
 
-.search-input::placeholder {
-  color: #9e9e9e;
-}
-
 .clear-button {
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background-color: #bdbdbd;
+  background-color: #6e6e73;
   color: #ffffff;
-  font-size: 18px;
+  font-size: 14px;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 400;
   flex-shrink: 0;
 }
 
 /* ----- サジェスト ----- */
 .suggestions {
-  margin-top: 8px;
+  margin-top: 12px;
   background-color: #ffffff;
-  border-radius: 12px;
+  border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .suggestion-item {
-  padding: 14px 16px;
+  padding: 14px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
   background-color: #ffffff;
+  min-height: 48px;
 }
 
 .suggestion-item + .suggestion-item {
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid #f5f5f7;
 }
 
 .suggestion-item:active {
-  background-color: #f5f5f5;
+  background-color: #f5f5f7;
 }
 
 .suggestion-name {
-  font-size: 15px;
-  color: #1a1a1a;
+  font-size: 17px;
+  color: #1d1d1f;
+  letter-spacing: -0.022em;
 }
 
 .suggestion-arrow {
   font-size: 14px;
-  color: #bdbdbd;
+  color: #6e6e73;
 }
 
-/* ----- 結果エリア共通 ----- */
+.suggestion-bags {
+  display: flex;
+  gap: 4px;
+}
+
+/* ----- 結果エリア ----- */
 .result {
-  padding: 0 16px;
+  padding: 0 20px;
 }
 
 /* ----- 初期表示 ----- */
@@ -181,24 +216,24 @@ ul {
 
 .initial-message {
   font-size: 14px;
-  color: #616161;
+  color: #6e6e73;
   text-align: center;
-  padding: 16px;
-  background-color: #fafafa;
-  border-radius: 12px;
-  margin-bottom: 24px;
+  padding: 0 4px 24px;
+  line-height: 1.42;
+  letter-spacing: 0;
 }
 
 .quick-list {
-  margin-bottom: 28px;
+  margin-bottom: 32px;
 }
 
 .quick-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  color: #757575;
+  color: #6e6e73;
   margin-bottom: 12px;
   padding-left: 4px;
+  letter-spacing: 0;
 }
 
 .quick-buttons {
@@ -208,15 +243,23 @@ ul {
 }
 
 .quick-btn {
-  background-color: #f0f0f0;
-  color: #1a1a1a;
+  background-color: transparent;
+  color: #0071e3;
   font-size: 14px;
-  padding: 10px 14px;
-  border-radius: 20px;
+  font-weight: 400;
+  padding: 8px 18px;
+  border: 1px solid #0071e3;
+  border-radius: 980px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  letter-spacing: -0.016em;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .quick-btn:active {
-  background-color: #e0e0e0;
+  background-color: #0071e3;
+  color: #ffffff;
 }
 
 /* ----- 凡例 ----- */
@@ -227,44 +270,61 @@ ul {
 .legend-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  background-color: #fafafa;
-  padding: 10px 12px;
-  border-radius: 10px;
+  gap: 14px;
+  background-color: #ffffff;
+  padding: 14px 16px;
+  border-radius: 18px;
+  cursor: pointer;
+  min-height: 48px;
+  transition: transform 0.15s;
+}
+
+.legend-item:active {
+  transform: scale(0.98);
 }
 
 .legend-swatch {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 20px;
   flex-shrink: 0;
 }
 
 .legend-label {
   display: flex;
   flex-direction: column;
-  font-size: 14px;
+  font-size: 17px;
+  flex: 1;
+  letter-spacing: -0.022em;
 }
 
 .legend-label strong {
-  color: #1a1a1a;
+  color: #1d1d1f;
   font-weight: 600;
 }
 
 .legend-bag {
-  font-size: 11px;
-  color: #757575;
+  font-size: 12px;
+  color: #6e6e73;
   margin-top: 2px;
+  letter-spacing: 0;
+}
+
+.legend-arrow {
+  margin-left: auto;
+  font-size: 18px;
+  color: #6e6e73;
+  font-weight: 300;
 }
 
 /* ----- 検索結果 ----- */
@@ -275,28 +335,34 @@ ul {
 /* メイン品目カード */
 .item-card {
   background-color: #ffffff;
-  border-radius: 16px;
-  padding: 20px 16px;
+  border-radius: 18px;
+  padding: 24px 20px;
   margin-bottom: 16px;
 }
 
 .item-card-main {
-  background-color: #fafafa;
+  background-color: #ffffff;
 }
 
 .item-name {
-  font-size: 22px;
-  font-weight: 700;
-  color: #1a1a1a;
+  font-family: "SF Pro JP", "SF Pro Display", "SF Pro Icons",
+    "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", メイリオ, Meiryo,
+    "ＭＳ Ｐゴシック", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.14;
+  letter-spacing: 0.007em;
+  color: #1d1d1f;
   margin-bottom: 8px;
   text-align: center;
 }
 
 .item-multi-note {
-  font-size: 12px;
-  color: #757575;
+  font-size: 13px;
+  color: #6e6e73;
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  letter-spacing: 0;
 }
 
 .parts-grid {
@@ -305,85 +371,108 @@ ul {
   gap: 12px;
 }
 
-/* 部品ごとのカード（袋色背景） */
+/* 部品ごとのカード（袋色背景はインライン） */
 .part-card {
-  border-radius: 14px;
-  padding: 16px;
+  border-radius: 18px;
+  padding: 18px 20px;
 }
 
 .part-name {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   opacity: 0.85;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  letter-spacing: 0;
 }
 
 .part-classification {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 4px;
 }
 
 .part-icon {
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1;
 }
 
 .part-label {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: 0.011em;
 }
 
 .part-bag {
-  font-size: 13px;
+  font-size: 14px;
   opacity: 0.85;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .part-note {
-  font-size: 12px;
-  margin-top: 10px;
-  padding: 8px 10px;
-  background-color: rgba(255, 255, 255, 0.25);
-  border-radius: 6px;
+  font-size: 13px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background-color: rgba(255, 255, 255, 0.28);
+  border-radius: 12px;
   line-height: 1.5;
+}
+
+.part-detail-link {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 14px;
+  text-decoration: underline;
+  color: inherit;
+  opacity: 0.9;
+}
+
+.part-detail-link:active {
+  opacity: 0.6;
 }
 
 /* ----- サブ候補 ----- */
 .sub-section {
   margin-top: 20px;
-  padding: 16px;
-  background-color: #fafafa;
-  border-radius: 14px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 18px;
 }
 
 .sub-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  color: #757575;
+  color: #6e6e73;
   margin-bottom: 12px;
+  letter-spacing: 0;
 }
 
 .sub-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .sub-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 14px;
-  background-color: #ffffff;
-  border-radius: 10px;
+  padding: 14px 16px;
+  background-color: #f5f5f7;
+  border-radius: 14px;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 17px;
+  min-height: 48px;
+  letter-spacing: -0.022em;
 }
 
 .sub-item:active {
-  background-color: #f0f0f0;
+  background-color: #ebebed;
+}
+
+.sub-item-name {
+  flex: 1;
+  color: #1d1d1f;
 }
 
 .sub-bags {
@@ -400,127 +489,106 @@ ul {
 
 /* ----- 該当なし ----- */
 .no-result {
-  padding: 32px 20px;
+  padding: 32px 24px;
   text-align: center;
-  background-color: #fafafa;
-  border-radius: 14px;
+  background-color: #ffffff;
+  border-radius: 18px;
 }
 
 .no-result-title {
-  font-size: 16px;
+  font-size: 21px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #1d1d1f;
   margin-bottom: 12px;
+  letter-spacing: 0.011em;
 }
 
 .no-result-text {
-  font-size: 13px;
-  color: #757575;
-  line-height: 1.7;
+  font-size: 14px;
+  color: #6e6e73;
+  line-height: 1.5;
+  letter-spacing: 0;
 }
 
 /* ----- フッター ----- */
 .footer {
-  padding: 24px 20px;
+  padding: 32px 20px 16px;
   text-align: center;
-  font-size: 11px;
-  color: #9e9e9e;
+  font-size: 12px;
+  color: #6e6e73;
   margin-top: 32px;
+  line-height: 1.5;
+  letter-spacing: 0;
 }
 
 .footer-note {
-  margin-top: 6px;
-  line-height: 1.6;
-}
-
-/* ----- 凡例（クリック可能に） ----- */
-.legend-item {
-  cursor: pointer;
-  transition: background-color 0.15s;
-}
-
-.legend-item:active {
-  background-color: #f0f0f0;
-}
-
-.legend-arrow {
-  margin-left: auto;
-  font-size: 16px;
-  color: #bdbdbd;
-}
-
-.legend-label {
-  flex: 1;
+  margin-top: 8px;
 }
 
 /* ----- 戻るバー ----- */
 .back-bar {
   display: flex;
   gap: 8px;
-  padding: 8px 0 12px;
+  padding: 16px 0;
 }
 
 .back-btn {
   display: inline-flex;
   align-items: center;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 8px 14px;
-  border-radius: 18px;
-  background-color: #f0f0f0;
-  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 400;
+  padding: 8px 18px;
+  border-radius: 980px;
+  background-color: transparent;
+  color: #1d1d1f;
+  border: 1px solid #d2d2d7;
   cursor: pointer;
-  transition: background-color 0.15s;
+  min-height: 36px;
+  letter-spacing: -0.016em;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .back-btn:active {
-  background-color: #e0e0e0;
+  background-color: #f5f5f7;
 }
 
 .back-btn-prev {
-  background-color: #e3f2fd;
-  color: #1565c0;
+  color: #0071e3;
+  border-color: #0071e3;
 }
 
 .back-btn-prev:active {
-  background-color: #bbdefb;
+  background-color: #0071e3;
+  color: #ffffff;
 }
 
 .back-btn-home {
   margin-left: auto;
 }
 
-/* ----- 部品カード内のリンク ----- */
-.part-detail-link {
-  display: inline-block;
-  margin-top: 12px;
-  font-size: 12px;
-  text-decoration: underline;
-  opacity: 0.85;
-}
-
-.part-detail-link:active {
-  opacity: 0.5;
-}
-
 /* ----- 袋詳細ページ ----- */
 .bag-page-header {
-  padding: 24px 20px;
+  padding: 32px 20px;
   text-align: center;
-  border-radius: 16px;
-  margin-bottom: 20px;
+  border-radius: 18px;
+  margin-bottom: 16px;
 }
 
 .bag-page-icon {
-  font-size: 48px;
+  font-size: 56px;
   line-height: 1;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .bag-page-title {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 4px;
+  font-family: "SF Pro JP", "SF Pro Display", "SF Pro Icons",
+    "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", メイリオ, Meiryo,
+    "ＭＳ Ｐゴシック", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.10;
+  letter-spacing: 0.007em;
+  margin-bottom: 6px;
 }
 
 .bag-page-bagname {
@@ -536,31 +604,33 @@ ul {
 
 /* 出し方ガイド */
 .howto-section {
-  background-color: #fafafa;
-  padding: 18px 16px;
-  border-radius: 14px;
-  margin-bottom: 20px;
+  background-color: #ffffff;
+  padding: 24px 20px;
+  border-radius: 18px;
+  margin-bottom: 16px;
 }
 
 .howto-summary {
-  font-size: 14px;
-  color: #424242;
-  line-height: 1.7;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #eeeeee;
+  font-size: 15px;
+  color: #1d1d1f;
+  line-height: 1.5;
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #f5f5f7;
+  letter-spacing: -0.014em;
 }
 
 .howto-heading {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: #1a1a1a;
-  margin-top: 16px;
-  margin-bottom: 8px;
+  color: #6e6e73;
+  margin-top: 18px;
+  margin-bottom: 10px;
+  letter-spacing: 0;
 }
 
 .howto-heading-ng {
-  color: #c62828;
+  color: #6e6e73;
 }
 
 .howto-heading:first-child {
@@ -573,53 +643,54 @@ ul {
 }
 
 .howto-list li {
-  font-size: 13px;
-  color: #424242;
-  line-height: 1.7;
+  font-size: 15px;
+  color: #1d1d1f;
+  line-height: 1.5;
   padding: 6px 0 6px 18px;
   position: relative;
+  letter-spacing: -0.014em;
 }
 
 .howto-list li::before {
   content: "•";
   position: absolute;
   left: 4px;
-  color: #757575;
+  color: #6e6e73;
 }
 
 .howto-list-ng li::before {
   content: "×";
-  color: #c62828;
+  color: #1d1d1f;
 }
 
 .howto-note {
-  margin-top: 16px;
-  padding: 12px;
-  background-color: #fff8e1;
-  border-radius: 8px;
-  font-size: 12px;
-  color: #5d4037;
-  line-height: 1.6;
+  margin-top: 18px;
+  padding: 14px 16px;
+  background-color: #f5f5f7;
+  border-radius: 12px;
+  font-size: 13px;
+  color: #6e6e73;
+  line-height: 1.5;
 }
 
 /* 関連リンク */
 .links-section {
-  margin-bottom: 20px;
-  padding: 4px;
+  margin-bottom: 16px;
 }
 
 .links-heading {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: #757575;
-  padding: 0 12px;
+  color: #6e6e73;
   margin-bottom: 12px;
+  padding-left: 4px;
+  letter-spacing: 0;
 }
 
 .links-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .link-item a {
@@ -627,107 +698,102 @@ ul {
   flex-direction: column;
   text-decoration: none;
   color: inherit;
-  padding: 14px 16px;
-  background-color: #fafafa;
-  border-radius: 12px;
-  transition: background-color 0.15s;
+  padding: 16px 20px;
+  background-color: #ffffff;
+  border-radius: 18px;
+  transition: transform 0.15s;
+  min-height: 48px;
 }
 
 .link-item a:active {
-  background-color: #f0f0f0;
+  transform: scale(0.98);
 }
 
 .link-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  color: #1565c0;
+  color: #0066cc;
   margin-bottom: 4px;
+  letter-spacing: -0.016em;
 }
 
 .link-desc {
-  font-size: 12px;
-  color: #757575;
+  font-size: 13px;
+  color: #6e6e73;
   line-height: 1.5;
+  letter-spacing: 0;
 }
 
 /* 該当品目一覧 */
 .items-section {
-  background-color: #ffffff;
-  padding: 16px 4px;
+  margin-bottom: 16px;
 }
 
 .items-heading {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: #757575;
-  padding: 0 12px;
+  color: #6e6e73;
   margin-bottom: 12px;
+  padding-left: 4px;
+  letter-spacing: 0;
 }
 
 .items-empty {
-  font-size: 13px;
-  color: #9e9e9e;
+  font-size: 14px;
+  color: #6e6e73;
   text-align: center;
-  padding: 24px;
+  padding: 32px 24px;
+  background-color: #ffffff;
+  border-radius: 18px;
 }
 
 .items-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .bag-item {
-  background-color: #fafafa;
-  padding: 12px 14px;
-  border-radius: 10px;
+  background-color: #ffffff;
+  padding: 14px 18px;
+  border-radius: 14px;
   cursor: pointer;
-  transition: background-color 0.15s;
+  transition: transform 0.15s;
+  min-height: 48px;
 }
 
 .bag-item:active {
-  background-color: #f0f0f0;
+  transform: scale(0.98);
 }
 
 .bag-item-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: #1a1a1a;
+  font-size: 17px;
+  font-weight: 400;
+  color: #1d1d1f;
+  letter-spacing: -0.022em;
 }
 
 .bag-item-detail {
-  font-size: 11px;
-  color: #757575;
+  font-size: 12px;
+  color: #6e6e73;
   margin-top: 4px;
   line-height: 1.5;
+  letter-spacing: 0;
 }
 
 .bag-item-detail em {
   font-style: normal;
-  font-weight: 500;
-  color: #616161;
+  font-weight: 600;
+  color: #1d1d1f;
 }
 
 .bag-item-detail small {
-  color: #9e9e9e;
+  color: #6e6e73;
 }
 
-/* ----- サジェスト内のドット ----- */
-.suggestion-bags {
-  display: flex;
-  gap: 4px;
-}
-
-.sub-item-name {
-  flex: 1;
-}
-
-/* ----- 480px超えたとき（PC用フォールバック） ----- */
+/* ----- 480px超え（PC表示） ----- */
 @media (min-width: 481px) {
   body {
-    background-color: #e0e0e0;
-  }
-  .app {
-    box-shadow: 0 0 24px rgba(0, 0, 0, 0.06);
+    background-color: #f5f5f7;
   }
 }
