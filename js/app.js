@@ -731,9 +731,16 @@
     }
   });
 
-  // ===== ロゴ→ホーム =====
+  // ===== ロゴ→ホーム（常に最上部へ） =====
   if (titleHomeEl) {
     titleHomeEl.addEventListener('click', () => {
+      // ホームの保存スクロール位置をクリアして強制的に先頭へ
+      try {
+        sessionStorage.removeItem(scrollKey(''));
+        sessionStorage.removeItem(scrollKey('#'));
+      } catch (e) {
+        // sessionStorage 使えない環境は無視
+      }
       navigate('');
       searchInput.blur();
     });

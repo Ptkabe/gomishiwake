@@ -137,7 +137,7 @@ a {
   display: flex;
   align-items: center;
   padding: 0 20px;
-  min-height: 48px;
+  height: 48px;
   box-shadow: var(--soft-shadow);
   transition: box-shadow 0.2s;
 }
@@ -150,7 +150,8 @@ a {
   flex: 1;
   min-width: 0;
   font-size: 17px;
-  line-height: normal;
+  line-height: 48px;
+  height: 48px;
   background: transparent;
   width: 100%;
   padding: 0;
@@ -159,16 +160,17 @@ a {
   outline: 0;
   color: #1d1d1f;
   letter-spacing: -0.022em;
+  font-family: inherit;
   -webkit-appearance: none;
   appearance: none;
-  font-family: inherit;
+  /* iOS Safari ではこれで text と cursor が同じ baseline に揃う */
+  -webkit-text-fill-color: #1d1d1f;
+  display: block;
 }
 
-/* iOS Safari の input カーソル中央寄せ補正
-   - height は使わず親の min-height + flex align-items:center に任せる
-   - input 自身は line-height:normal で自然な高さに */
-input.search-input {
-  height: auto;
+.search-input::placeholder {
+  line-height: 48px;
+  vertical-align: middle;
 }
 
 .search-input::placeholder {
