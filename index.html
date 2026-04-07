@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1e88e5">
+  <title>南そらちゴミ分別 | 長沼・南幌・由仁</title>
+  <meta name="description" content="長沼町・南幌町・由仁町（南空知公衆衛生組合）のごみ分別を品名から検索できるツール">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <!-- ヘッダー -->
+    <header class="header">
+      <h1 class="title">ゴミ分別けんさく</h1>
+      <p class="subtitle">長沼町・南幌町・由仁町（南空知公衆衛生組合）共通</p>
+    </header>
+
+    <!-- 検索ボックス -->
+    <section class="search-section">
+      <div class="search-box">
+        <input
+          type="text"
+          id="search-input"
+          class="search-input"
+          placeholder="品名を入力（例：ペットボトル）"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+        >
+        <button type="button" id="clear-button" class="clear-button" aria-label="クリア" hidden>×</button>
+      </div>
+      <ul id="suggestions" class="suggestions" hidden></ul>
+    </section>
+
+    <!-- 結果表示 -->
+    <main class="result" id="result">
+      <!-- 初期表示：使い方ガイド -->
+      <section id="initial-view" class="initial-view">
+        <p class="initial-message">品名を入力すると、どの袋に入れるかがわかります。</p>
+
+        <div class="quick-list">
+          <h2 class="quick-title">よく検索される品目</h2>
+          <div class="quick-buttons" id="quick-buttons"></div>
+        </div>
+
+        <div class="bag-legend">
+          <h2 class="quick-title">ゴミ袋の種類</h2>
+          <ul class="legend-list" id="legend-list"></ul>
+        </div>
+      </section>
+
+      <!-- 検索結果はここに描画 -->
+      <section id="search-result" class="search-result" hidden></section>
+    </main>
+
+    <!-- フッター -->
+    <footer class="footer">
+      <p>データ出典：南空知公衆衛生組合「ごみの分別手帖」（令和7年3月改定版）</p>
+      <p class="footer-note">迷ったら役場へ：長沼町 0123-76-8012 / 南幌町 011-398-7047 / 由仁町 0123-83-3902</p>
+    </footer>
+  </div>
+
+  <!-- ライブラリ -->
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
+
+  <!-- アプリ（バージョン更新でキャッシュバスター） -->
+  <script src="js/classification.js?v=3"></script>
+  <script src="js/data.js?v=3"></script>
+  <script src="js/app.js?v=3"></script>
+</body>
+</html>
