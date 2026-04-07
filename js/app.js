@@ -18,6 +18,7 @@
   const searchResultEl = $('search-result');
   const quickButtonsEl = $('quick-buttons');
   const legendListEl = $('legend-list');
+  const titleHomeEl = $('title-home');
 
   // ===== カナ⇄ひらがな変換 =====
   const toHiragana = (str) =>
@@ -627,6 +628,14 @@
       suggestionsEl.hidden = true;
     }
   });
+
+  // ===== ロゴ→ホーム =====
+  if (titleHomeEl) {
+    titleHomeEl.addEventListener('click', () => {
+      navigate('');
+      searchInput.blur();
+    });
+  }
 
   // ===== 初期描画 =====
   renderQuickButtons();
