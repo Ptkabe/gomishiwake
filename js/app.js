@@ -196,7 +196,6 @@
         </div>
       `;
       bindBackButtons();
-      window.scrollTo({ top: 0 });
       return;
     }
 
@@ -234,7 +233,6 @@
     });
 
     bindBackButtons();
-    window.scrollTo({ top: 0 });
   }
 
   // ===== 戻るボタン群 =====
@@ -267,6 +265,55 @@
     }
   }
 
+  // ===== ひらがな正規化（濁点・半濁点・小書き仮名 → 清音清音清音） =====
+  function normalizeKana(c) {
+    if (!c) return c;
+    if ('ぱぴぷぺぽ'.indexOf(c) !== -1) return String.fromCharCode(c.charCodeAt(0) - 2);
+    if ('がぎぐげござじずぜぞだぢづでどばびぶべぼ'.indexOf(c) !== -1) {
+      return String.fromCharCode(c.charCodeAt(0) - 1);
+    }
+    const small = 'ぁぃぅぇぉっゃゅょゎ';
+    const large = 'あいうえおつやゆよわ';
+    const idx = small.indexOf(c);
+    if (idx !== -1) return large[idx];
+    if (c === 'ゔ') return 'う';
+    return c;
+  }
+
+  // ===== 出典リンク決定 =====
+  function getItemSource(item) {
+    // 明示的な src 指定があればそれを使う
+    if (item.src && window.SOURCES[item.src]) {
+      return { source: window.SOURCES[item.src], page: null };
+    }
+    // 不可カテゴリの品目は不可PDFを参照
+    if (item.p.some((p) => p.b === '不可')) {
+      return { source: window.SOURCES.impossible, page: null };
+    }
+    // それ以外はメインPDF（50音順手帖）を参照、ひらがな読みからページを推定
+    const main = window.SOURCES.main;
+    const firstChar = item.k ? item.k[0] : '';
+    const normalized = normalizeKana(firstChar);
+    const manualPage = window.KANA_TO_PAGE[normalized] || 1;
+    const pdfPage = manualPage + (main.pageOffset || 0);
+    return { source: main, page: pdfPage, manualPage };
+  }
+
+  function renderSourceFooter(item) {
+    const { source, page, manualPage } = getItemSource(item);
+    if (!source) return '';
+    const url = page ? `${source.url}#page=${page}` : source.url;
+    const pageNote = manualPage ? `P.${manualPage}付近` : '';
+    return `
+      <div class="item-source">
+        <span class="item-source-label">出典</span>
+        <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="item-source-link">
+          ${escapeHtml(source.publisher)}「${escapeHtml(source.short)}」${pageNote ? ' ' + pageNote : ''} ↗
+        </a>
+      </div>
+    `;
+  }
+
   // ===== 品目カード描画 =====
   function renderItemCard(item, isMain) {
     const partsHtml = item.p
@@ -293,6 +340,7 @@
         <h2 class="item-name">${escapeHtml(item.n)}</h2>
         ${item.p.length > 1 ? '<p class="item-multi-note">部品ごとに分別してください</p>' : ''}
         <div class="parts-grid">${partsHtml}</div>
+        ${renderSourceFooter(item)}
       </article>
     `;
   }
@@ -451,7 +499,6 @@
     });
 
     bindBackButtons();
-    window.scrollTo({ top: 0 });
   }
 
   // ===== ホーム表示 =====
@@ -461,12 +508,57 @@
     suggestionsEl.hidden = true;
     searchResultEl.hidden = true;
     initialView.hidden = false;
-    window.scrollTo({ top: 0 });
+  }
+
+  // ===== スクロール位置の保存・復元 =====
+  // ブラウザ自動復元を無効化（自前で管理する）
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+
+  function scrollKey(hashOrUrl) {
+    return 'scroll:' + (hashOrUrl || '#');
+  }
+
+  function saveScrollFor(hashOrUrl) {
+    try {
+      sessionStorage.setItem(scrollKey(hashOrUrl), String(window.scrollY || 0));
+    } catch (e) {
+      // sessionStorage が使えない環境は無視
+    }
+  }
+
+  function restoreScrollFor(hashOrUrl) {
+    let saved = null;
+    try {
+      saved = sessionStorage.getItem(scrollKey(hashOrUrl));
+    } catch (e) {
+      saved = null;
+    }
+    const top = saved !== null ? parseInt(saved, 10) || 0 : 0;
+    const doScroll = () => {
+      if (typeof window.scrollTo === 'function') {
+        try {
+          window.scrollTo({ top, left: 0, behavior: 'instant' });
+        } catch (e) {
+          window.scrollTo(0, top);
+        }
+      }
+    };
+    // 即時に1回 + 次フレームで再度（保存位置が長いコンテンツの場合のため）
+    doScroll();
+    if (typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(doScroll);
+    } else if (typeof globalThis !== 'undefined' && typeof globalThis.setTimeout === 'function') {
+      globalThis.setTimeout(doScroll, 0);
+    }
   }
 
   // ===== ナビゲーション（hashを変える） =====
   function navigate(hash) {
     window.__appHasNavigated = true;
+    // 現在ページのスクロール位置を保存
+    saveScrollFor(location.hash);
     if (location.hash === '#' + hash || (location.hash === '' && hash === '')) {
       // 同じhashなら再描画だけ
       handleRoute();
@@ -496,9 +588,19 @@
       // ホーム
       renderHome();
     }
+
+    // レンダー後にスクロール位置を復元（保存されていなければ先頭へ）
+    restoreScrollFor(location.hash);
   }
 
-  window.addEventListener('hashchange', handleRoute);
+  window.addEventListener('hashchange', (e) => {
+    // ブラウザの戻る/進むやリンククリックでも、離れる前のページの位置を保存
+    if (e && e.oldURL) {
+      const oldHash = (new URL(e.oldURL)).hash || '';
+      saveScrollFor(oldHash);
+    }
+    handleRoute();
+  });
 
   // ===== クイックボタン =====
   const QUICK_ITEMS = [
