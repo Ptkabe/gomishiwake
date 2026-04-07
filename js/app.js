@@ -531,7 +531,7 @@
 
   // ===== 凡例 =====
   function renderLegend() {
-    const order = ['生', '赤', '青', '茶', '灰', '白', '紙資源', '電池', '蛍光', '粗大', '直接青', '直接粗', '不可'];
+    const order = ['生', '赤', '青', '青単', 'おむつ', '茶', '灰', '白', '紙資源', '電池', '蛍光', '粗大', '直接青', '直接粗', '不可'];
     legendListEl.innerHTML = order
       .map((key) => {
         const cls = window.CLASSIFICATION[key];
