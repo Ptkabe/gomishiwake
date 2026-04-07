@@ -340,5 +340,27 @@ window.CLASSIFICATION = {
       "直接搬入も受け付けません",
     ],
     note: "迷ったら役場か組合（0123-88-3900）にお問い合わせください",
+    links: [
+      {
+        title: "南空知公衆衛生組合 ごみの分別ページ",
+        url: "http://minamisorati.jp/separate/",
+        desc: "公式の最新情報・PDFがダウンロードできます",
+      },
+      {
+        title: "パソコン3R推進協会",
+        url: "http://www.pc3r.jp/",
+        desc: "使用済みパソコンの回収・再資源化（℡03-5282-7685）",
+      },
+      {
+        title: "消火器リサイクル推進センター",
+        url: "http://www.ferpc.jp/",
+        desc: "古い消火器の処分窓口検索（℡03-5829-6773）",
+      },
+      {
+        title: "二輪車リサイクルコールセンター",
+        url: "http://www.jarc.or.jp/motorcycle/",
+        desc: "オートバイの処分（℡050-3000-0727）",
+      },
+    ],
   },
 };

@@ -453,17 +453,41 @@ ul {
   flex: 1;
 }
 
-/* ----- 戻るボタン ----- */
+/* ----- 戻るバー ----- */
+.back-bar {
+  display: flex;
+  gap: 8px;
+  padding: 8px 0 12px;
+}
+
 .back-btn {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   font-size: 13px;
-  color: #1e88e5;
-  padding: 8px 4px 12px;
   font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 18px;
+  background-color: #f0f0f0;
+  color: #1a1a1a;
+  cursor: pointer;
+  transition: background-color 0.15s;
 }
 
 .back-btn:active {
-  opacity: 0.6;
+  background-color: #e0e0e0;
+}
+
+.back-btn-prev {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.back-btn-prev:active {
+  background-color: #bbdefb;
+}
+
+.back-btn-home {
+  margin-left: auto;
 }
 
 /* ----- 部品カード内のリンク ----- */
@@ -576,6 +600,54 @@ ul {
   font-size: 12px;
   color: #5d4037;
   line-height: 1.6;
+}
+
+/* 関連リンク */
+.links-section {
+  margin-bottom: 20px;
+  padding: 4px;
+}
+
+.links-heading {
+  font-size: 14px;
+  font-weight: 600;
+  color: #757575;
+  padding: 0 12px;
+  margin-bottom: 12px;
+}
+
+.links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.link-item a {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  padding: 14px 16px;
+  background-color: #fafafa;
+  border-radius: 12px;
+  transition: background-color 0.15s;
+}
+
+.link-item a:active {
+  background-color: #f0f0f0;
+}
+
+.link-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1565c0;
+  margin-bottom: 4px;
+}
+
+.link-desc {
+  font-size: 12px;
+  color: #757575;
+  line-height: 1.5;
 }
 
 /* 該当品目一覧 */

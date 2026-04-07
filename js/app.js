@@ -3,7 +3,7 @@
  * - Fuse.js + 部分一致のハイブリッド検索
  * - インクリメンタルサジェスト
  * - IME（日本語入力）対応
- * - ハッシュルーティング（袋詳細ページ）
+ * - 全状態をhashで管理（ホーム / 検索結果 / 袋詳細）→ ブラウザの戻るで自然に遡れる
  */
 
 (function () {
@@ -70,11 +70,8 @@
     });
 
     // 2) 双方向部分一致
-    //    - 品目名にクエリが含まれる（例: 「鍋」→「金属製鍋」）
-    //    - クエリに品目名が含まれる（例: 「金属製鍋」→「鍋」）
     window.GOMI_DATA.forEach((item) => {
       if (seen.has(item.n)) return;
-
       const hits =
         item.n.includes(trimmed) ||
         trimmed.includes(item.n) ||
@@ -84,18 +81,13 @@
           item.a.some(
             (a) => a.includes(trimmed) || trimmed.includes(a) || a.includes(kata)
           ));
-
       if (hits) add(item);
     });
 
     // 3) Fuse.js のあいまい検索
-    const fuzzy = fuse.search(trimmed);
-    fuzzy.forEach(({ item }) => add(item));
-
-    // 4) ひらがな化したクエリでも Fuse 検索
+    fuse.search(trimmed).forEach(({ item }) => add(item));
     if (trimmed !== hira) {
-      const fuzzyHira = fuse.search(hira);
-      fuzzyHira.forEach(({ item }) => add(item));
+      fuse.search(hira).forEach(({ item }) => add(item));
     }
 
     return results;
@@ -132,23 +124,23 @@
     if (results.length === 0) {
       searchResultEl.innerHTML = `
         <div class="no-result">
+          ${renderBackButtons()}
           <p class="no-result-title">該当する品目が見つかりませんでした</p>
           <p class="no-result-text">
             別の言い方を試してみてください。<br>
             それでも見つからない場合は、役場か南空知公衆衛生組合（0123-88-3900）にお問い合わせください。
           </p>
-          <button type="button" class="back-btn" id="back-to-home">← ホームに戻る</button>
         </div>
       `;
-      bindBackButton();
+      bindBackButtons();
+      window.scrollTo({ top: 0 });
       return;
     }
 
     const main = results[0];
     const subCandidates = results.slice(1, 8);
 
-    let html = '';
-    html += `<button type="button" class="back-btn" id="back-to-home">← ホームに戻る</button>`;
+    let html = renderBackButtons();
     html += renderItemCard(main, true);
 
     if (subCandidates.length > 0) {
@@ -170,32 +162,44 @@
 
     searchResultEl.innerHTML = html;
 
-    // サブ候補クリックで再検索
+    // サブ候補クリックで再検索（hash変更）
     searchResultEl.querySelectorAll('.sub-item').forEach((el) => {
       el.addEventListener('click', () => {
         const name = el.dataset.name;
-        searchInput.value = name;
-        clearButton.hidden = false;
-        suggestionsEl.hidden = true;
-        renderSearchResult(name);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        navigate(`search/${encodeURIComponent(name)}`);
       });
     });
 
-    bindBackButton();
+    bindBackButtons();
+    window.scrollTo({ top: 0 });
   }
 
-  function bindBackButton() {
-    const back = document.getElementById('back-to-home');
-    if (back) {
-      back.addEventListener('click', () => {
-        location.hash = '';
-        searchInput.value = '';
-        clearButton.hidden = true;
-        suggestionsEl.hidden = true;
-        searchResultEl.hidden = true;
-        initialView.hidden = false;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+  // ===== 戻るボタン群 =====
+  function renderBackButtons() {
+    return `
+      <div class="back-bar">
+        <button type="button" class="back-btn back-btn-prev" id="back-prev">← 戻る</button>
+        <button type="button" class="back-btn back-btn-home" id="back-home">🏠 ホーム</button>
+      </div>
+    `;
+  }
+
+  function bindBackButtons() {
+    const prev = document.getElementById('back-prev');
+    if (prev) {
+      prev.addEventListener('click', () => {
+        // 履歴があれば前のページへ。なければホームへ
+        if (window.history.length > 1 && window.__appHasNavigated) {
+          history.back();
+        } else {
+          navigate('');
+        }
+      });
+    }
+    const home = document.getElementById('back-home');
+    if (home) {
+      home.addEventListener('click', () => {
+        navigate('');
       });
     }
   }
@@ -205,10 +209,7 @@
     const partsHtml = item.p
       .map((part) => {
         const cls = window.CLASSIFICATION[part.b];
-        if (!cls) {
-          console.warn('Unknown classification:', part.b);
-          return '';
-        }
+        if (!cls) return '';
         return `
           <div class="part-card" style="background-color:${cls.bagColor};color:${cls.textColor};">
             ${part.pt ? `<div class="part-name">${escapeHtml(part.pt)}</div>` : ''}
@@ -265,33 +266,31 @@
   function renderBagPage(bagKey) {
     const cls = window.CLASSIFICATION[bagKey];
     if (!cls) {
-      renderSearchResult(''); // ホームに戻す
+      navigate('');
       return;
     }
 
     initialView.hidden = true;
     searchResultEl.hidden = false;
 
-    // この項目に該当する品目を抽出
+    // 該当品目を抽出
     const matchedItems = window.GOMI_DATA.filter((item) =>
       item.p.some((p) => p.b === bagKey)
     );
 
-    // ソート: 品目全体が該当するもの（部品名なし or 部品が1つだけ）を優先 → 50音順
+    // ソート: 品目全体が該当するものを優先 → 50音順
     matchedItems.sort((a, b) => {
       const aFull = a.p.length === 1 && a.p[0].b === bagKey && !a.p[0].pt;
       const bFull = b.p.length === 1 && b.p[0].b === bagKey && !b.p[0].pt;
       if (aFull && !bFull) return -1;
       if (!aFull && bFull) return 1;
-      // 次に: 該当する部品の数が多い方を優先
       const aCount = a.p.filter((p) => p.b === bagKey).length;
       const bCount = b.p.filter((p) => p.b === bagKey).length;
       if (aCount !== bCount) return bCount - aCount;
       return a.k.localeCompare(b.k, 'ja');
     });
 
-    let html = '';
-    html += `<button type="button" class="back-btn" id="back-to-home">← ホームに戻る</button>`;
+    let html = renderBackButtons();
 
     // ヘッダー（袋の見出し）
     html += `
@@ -329,6 +328,25 @@
     }
     html += `</section>`;
 
+    // 外部リンク
+    if (cls.links && cls.links.length) {
+      html += `<section class="links-section">`;
+      html += `<h3 class="links-heading">🔗 関連リンク</h3>`;
+      html += `<ul class="links-list">`;
+      cls.links.forEach((link) => {
+        html += `
+          <li class="link-item">
+            <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">
+              <span class="link-title">${escapeHtml(link.title)} ↗</span>
+              ${link.desc ? `<span class="link-desc">${escapeHtml(link.desc)}</span>` : ''}
+            </a>
+          </li>
+        `;
+      });
+      html += `</ul>`;
+      html += `</section>`;
+    }
+
     // 該当品目一覧
     html += `<section class="items-section">`;
     html += `<h3 class="items-heading">📋 この項目に該当する品目（${matchedItems.length}件）</h3>`;
@@ -337,7 +355,6 @@
     } else {
       html += `<ul class="items-list">`;
       matchedItems.forEach((item) => {
-        // この品目で該当する部品の備考だけ抜き出す
         const matchedParts = item.p.filter((p) => p.b === bagKey);
         const partInfo = matchedParts
           .map((p) => {
@@ -362,24 +379,65 @@
 
     searchResultEl.innerHTML = html;
 
-    // 品目クリックで検索結果ページへ
+    // 品目クリックで検索結果ページへ（hash変更）
     searchResultEl.querySelectorAll('.bag-item').forEach((el) => {
       el.addEventListener('click', () => {
         const name = el.dataset.name;
-        location.hash = '';
-        searchInput.value = name;
-        clearButton.hidden = false;
-        suggestionsEl.hidden = true;
-        renderSearchResult(name);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        navigate(`search/${encodeURIComponent(name)}`);
       });
     });
 
-    bindBackButton();
+    bindBackButtons();
     window.scrollTo({ top: 0 });
   }
 
-  // ===== クイックボタン（実在する品目に修正） =====
+  // ===== ホーム表示 =====
+  function renderHome() {
+    searchInput.value = '';
+    clearButton.hidden = true;
+    suggestionsEl.hidden = true;
+    searchResultEl.hidden = true;
+    initialView.hidden = false;
+    window.scrollTo({ top: 0 });
+  }
+
+  // ===== ナビゲーション（hashを変える） =====
+  function navigate(hash) {
+    window.__appHasNavigated = true;
+    if (location.hash === '#' + hash || (location.hash === '' && hash === '')) {
+      // 同じhashなら再描画だけ
+      handleRoute();
+      return;
+    }
+    location.hash = hash;
+  }
+
+  // ===== ハッシュルーティング =====
+  function handleRoute() {
+    const hash = location.hash.slice(1);
+
+    if (hash.startsWith('bag/')) {
+      // 詳細ページでは検索バーをクリア
+      searchInput.value = '';
+      clearButton.hidden = true;
+      suggestionsEl.hidden = true;
+      const key = decodeURIComponent(hash.slice(4));
+      renderBagPage(key);
+    } else if (hash.startsWith('search/')) {
+      const query = decodeURIComponent(hash.slice(7));
+      searchInput.value = query;
+      clearButton.hidden = !query;
+      suggestionsEl.hidden = true;
+      renderSearchResult(query);
+    } else {
+      // ホーム
+      renderHome();
+    }
+  }
+
+  window.addEventListener('hashchange', handleRoute);
+
+  // ===== クイックボタン =====
   const QUICK_ITEMS = [
     'ペットボトル',
     'スプレー缶',
@@ -403,15 +461,12 @@
     quickButtonsEl.querySelectorAll('.quick-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         const name = btn.dataset.name;
-        searchInput.value = name;
-        clearButton.hidden = false;
-        renderSearchResult(name);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        navigate(`search/${encodeURIComponent(name)}`);
       });
     });
   }
 
-  // ===== 凡例（袋の種類一覧） =====
+  // ===== 凡例 =====
   function renderLegend() {
     const order = ['生', '赤', '青', '茶', '灰', '白', '紙資源', '電池', '蛍光', '粗大', '直接青', '直接粗', '不可'];
     legendListEl.innerHTML = order
@@ -434,27 +489,10 @@
     legendListEl.querySelectorAll('.legend-item').forEach((el) => {
       el.addEventListener('click', () => {
         const key = el.dataset.bag;
-        location.hash = `bag/${encodeURIComponent(key)}`;
+        navigate(`bag/${encodeURIComponent(key)}`);
       });
     });
   }
-
-  // ===== ハッシュルーティング =====
-  function handleRoute() {
-    const hash = location.hash.slice(1);
-    if (hash.startsWith('bag/')) {
-      const key = decodeURIComponent(hash.slice(4));
-      renderBagPage(key);
-    } else if (!hash) {
-      // ホーム
-      if (!searchInput.value.trim()) {
-        initialView.hidden = false;
-        searchResultEl.hidden = true;
-      }
-    }
-  }
-
-  window.addEventListener('hashchange', handleRoute);
 
   // ===== IME対応 =====
   let isComposing = false;
@@ -477,16 +515,11 @@
   searchInput.addEventListener('input', (e) => {
     const query = e.target.value;
     clearButton.hidden = !query;
-
-    // IME入力中はサジェスト更新しない
     if (isComposing) return;
 
     if (!query.trim()) {
       suggestionsEl.hidden = true;
-      if (!location.hash) {
-        initialView.hidden = false;
-        searchResultEl.hidden = true;
-      }
+      // ホームに戻すかは hash の状態次第（直接的には変更しない）
       return;
     }
     renderSuggestions(query);
@@ -499,8 +532,7 @@
       const query = searchInput.value.trim();
       if (query) {
         suggestionsEl.hidden = true;
-        location.hash = '';
-        renderSearchResult(query);
+        navigate(`search/${encodeURIComponent(query)}`);
         searchInput.blur();
       }
     }
@@ -511,10 +543,8 @@
     const li = e.target.closest('.suggestion-item');
     if (!li) return;
     const name = li.dataset.name;
-    searchInput.value = name;
     suggestionsEl.hidden = true;
-    location.hash = '';
-    renderSearchResult(name);
+    navigate(`search/${encodeURIComponent(name)}`);
     searchInput.blur();
   });
 
@@ -523,9 +553,9 @@
     searchInput.value = '';
     clearButton.hidden = true;
     suggestionsEl.hidden = true;
-    location.hash = '';
-    initialView.hidden = false;
-    searchResultEl.hidden = true;
+    if (location.hash) {
+      navigate('');
+    }
     searchInput.focus();
   });
 
@@ -539,7 +569,7 @@
   // ===== 初期描画 =====
   renderQuickButtons();
   renderLegend();
-  handleRoute(); // 初回ロード時に hash があれば描画
+  handleRoute();
 
   console.log(`[ゴミ分別けんさく] ${window.GOMI_DATA.length} 品目を読み込みました`);
 })();
